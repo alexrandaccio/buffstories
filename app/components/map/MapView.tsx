@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import Map, {
   Marker,
   NavigationControl,
-  MapLayerMouseEvent
+  MapLayerMouseEvent,
 } from "react-map-gl/maplibre";
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -35,48 +35,43 @@ export default function MapView() {
       latitude: e.lngLat.lat,
       longitude: e.lngLat.lng,
       title: "",
-      description: ""
+      description: "",
     });
   };
 
   const fetchPins = async () => {
-    const { data, error } = await supabase
-        .from("pins")
-        .select("*");
+    const { data, error } = await supabase.from("pins").select("*");
 
     if (error) {
-        console.error(error);
-        return;
+      console.error(error);
+      return;
     }
 
-    setPins(data);
-    };
+    setPins(data || []);
+  };
 
-    const handleSavePin = async () => {
-        if (!draftPin) return;
+  const handleSavePin = async () => {
+    if (!draftPin) return;
 
-        const { error } = await supabase
-            .from("pins")
-            .insert({
-            title: draftPin.title,
-            description: draftPin.description,
-            latitude: draftPin.latitude,
-            longitude: draftPin.longitude
-            });
+    const { error } = await supabase.from("pins").insert({
+      title: draftPin.title,
+      description: draftPin.description,
+      latitude: draftPin.latitude,
+      longitude: draftPin.longitude,
+    });
 
-        if (error) {
-            console.error(error);
-            return;
-        }
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-        await fetchPins();
-
-        setDraftPin(null);
-        };
+    await fetchPins();
+    setDraftPin(null);
+  };
 
   useEffect(() => {
     fetchPins();
-    }, []);
+  }, []);
 
   return (
     <div className="relative w-full h-screen">
@@ -85,20 +80,20 @@ export default function MapView() {
         initialViewState={{
           longitude: -74.0431,
           latitude: 40.744,
-          zoom: 11
+          zoom: 11,
         }}
         mapStyle={`https://api.maptiler.com/maps/streets-v2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
       >
         <NavigationControl position="top-right" />
 
         {pins.map((pin) => (
-            <Marker
-                key={pin.id}
-                longitude={pin.longitude}
-                latitude={pin.latitude}
-            >
-                <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg" />
-            </Marker>
+          <Marker
+            key={pin.id}
+            longitude={pin.longitude}
+            latitude={pin.latitude}
+          >
+            <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg" />
+          </Marker>
         ))}
 
         {draftPin && (
@@ -114,7 +109,9 @@ export default function MapView() {
       {draftPin && (
         <div className="absolute top-0 right-0 h-full w-[400px] bg-white shadow-2xl border-l z-10 p-6 overflow-y-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-black text-xl font-semibold">Create Pin</h2>
+            <h2 className="text-xl font-semibold text-black">
+              Create Pin
+            </h2>
 
             <button
               onClick={() => setDraftPin(null)}
@@ -126,26 +123,25 @@ export default function MapView() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-black font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-black">
                 Title
               </label>
 
               <input
-                type="text"
                 value={draftPin.title}
                 onChange={(e) =>
                   setDraftPin({
                     ...draftPin,
-                    title: e.target.value
+                    title: e.target.value,
                   })
                 }
-                className="w-full border text-black rounded-lg px-3 py-2 outline-none"
+                className="w-full border rounded-lg px-3 py-2 text-black outline-none"
                 placeholder="Enter title"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-black font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-black">
                 Description
               </label>
 
@@ -154,27 +150,22 @@ export default function MapView() {
                 onChange={(e) =>
                   setDraftPin({
                     ...draftPin,
-                    description: e.target.value
+                    description: e.target.value,
                   })
                 }
-                className="w-full border text-black rounded-lg px-3 py-2 min-h-[150px] outline-none"
+                className="w-full border rounded-lg px-3 py-2 min-h-[150px] text-black outline-none"
                 placeholder="Enter description"
               />
             </div>
 
             <div className="text-sm text-gray-500 pt-2">
-              <div>
-                Lat: {draftPin.latitude.toFixed(5)}
-              </div>
-
-              <div>
-                Lng: {draftPin.longitude.toFixed(5)}
-              </div>
+              <div>Lat: {draftPin.latitude.toFixed(5)}</div>
+              <div>Lng: {draftPin.longitude.toFixed(5)}</div>
             </div>
 
             <button
-                onClick={handleSavePin}
-                className="w-full bg-black text-white rounded-lg py-3 hover:opacity-90"
+              onClick={handleSavePin}
+              className="w-full bg-black text-white rounded-lg py-3 hover:opacity-90"
             >
               Save Pin
             </button>
