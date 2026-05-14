@@ -45,27 +45,59 @@ export default function MapView() {
   };
 
   const handleSavePin = async () => {
-    if (state.mode !== "create") return;
+    // CREATE
+    if (state.mode === "create") {
+      const { data, error } = await supabase
+        .from("pins")
+        .insert({
+          title: state.draftPin.title,
+          description: state.draftPin.description,
+          latitude: state.draftPin.latitude,
+          longitude: state.draftPin.longitude,
+        })
+        .select()
+        .single();
 
-    const { data, error } = await supabase
-      .from("pins")
-      .insert({
-        title: state.draftPin.title,
-        description: state.draftPin.description,
-        latitude: state.draftPin.latitude,
-        longitude: state.draftPin.longitude,
-      })
-      .select()
-      .single();
+      if (error) {
+        console.error(error);
+        return;
+      }
 
-    if (error) {
-      console.error(error);
+      setPins((prev) => [...prev, data]);
+
+      dispatch({ type: "CREATE_SUCCESS" });
+
       return;
     }
 
-    setPins((prev) => [...prev, data]);
+    // EDIT
+    if (state.mode === "edit") {
+      const { data, error } = await supabase
+        .from("pins")
+        .update({
+          title: state.draftPin.title,
+          description: state.draftPin.description,
+        })
+        .eq("id", state.pinId)
+        .select()
+        .single();
 
-    dispatch({ type: "SAVE_SUCCESS" });
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setPins((prev) =>
+        prev.map((pin) => (pin.id === state.pinId ? data : pin)),
+      );
+
+      dispatch({
+        type: "OPEN_VIEW",
+        payload: data,
+      });
+
+      return;
+    }
   };
 
   return (

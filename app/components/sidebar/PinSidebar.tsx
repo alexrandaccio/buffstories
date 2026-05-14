@@ -1,6 +1,6 @@
 "use client";
 
-import PinCreateForm from "./PinCreateForm";
+import PinEditor from "./PinEditor";
 import PinViewPanel from "./PinViewPanel";
 import { Action, State } from "@/hooks/mapReducer";
 
@@ -29,14 +29,15 @@ export default function PinSidebar({ state, dispatch, onSave }: Props) {
         </button>
       </div>
 
-      {/* CREATE MODE */}
-      {state.mode === "create" && (
-        <PinCreateForm
+      {/* CREATE / EDIT MODES */}
+      {(state.mode === "create" || state.mode === "edit") && (
+        <PinEditor
+          mode={state.mode}
           draftPin={state.draftPin}
-          setDraftPin={(updated) =>
+          onChange={(patch) =>
             dispatch({
               type: "UPDATE_DRAFT",
-              payload: updated,
+              payload: patch,
             })
           }
           onSave={onSave}
@@ -45,7 +46,10 @@ export default function PinSidebar({ state, dispatch, onSave }: Props) {
 
       {/* VIEW MODE */}
       {state.mode === "view" && state.selectedPin && (
-        <PinViewPanel pin={state.selectedPin} />
+        <PinViewPanel
+          pin={state.selectedPin}
+          openEdit={() => dispatch({ type: "OPEN_EDIT" })}
+        />
       )}
     </div>
   );

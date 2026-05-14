@@ -4,9 +4,10 @@ import { Pin } from "@/types/pin";
 
 type Props = {
   pin: Pin;
+  openEdit: () => void;
 };
 
-export default function PinViewPanel({ pin }: Props) {
+export default function PinViewPanel({ pin, openEdit }: Props) {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-black">{pin.title}</h3>
@@ -21,6 +22,13 @@ export default function PinViewPanel({ pin }: Props) {
         <div>Lat: {pin.latitude.toFixed(5)}</div>
         <div>Lng: {pin.longitude.toFixed(5)}</div>
       </div>
+
+      <button
+        onClick={openEdit}
+        className="text-sm text-gray-500 hover:text-black"
+      >
+        Edit
+      </button>
     </div>
   );
 }
