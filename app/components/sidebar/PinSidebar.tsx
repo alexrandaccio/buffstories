@@ -11,16 +11,14 @@ type Props = {
 };
 
 export default function PinSidebar({ state, dispatch, onSave }: Props) {
-  const { mode, draftPin, selectedPin } = state;
-
-  if (mode === "none") return null;
+  if (state.mode === "none") return null;
 
   return (
     <div className="absolute top-0 right-0 h-full w-[400px] bg-white shadow-2xl border-l z-10 p-6 overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-black">
-          {draftPin ? "Create Pin" : "View Pin"}
+          {state.mode === "create" ? "Create Pin" : "View Pin"}
         </h2>
 
         <button
@@ -32,9 +30,9 @@ export default function PinSidebar({ state, dispatch, onSave }: Props) {
       </div>
 
       {/* CREATE MODE */}
-      {mode === "create" && draftPin && (
+      {state.mode === "create" && (
         <PinCreateForm
-          draftPin={draftPin}
+          draftPin={state.draftPin}
           setDraftPin={(updated) =>
             dispatch({
               type: "UPDATE_DRAFT",
@@ -46,7 +44,9 @@ export default function PinSidebar({ state, dispatch, onSave }: Props) {
       )}
 
       {/* VIEW MODE */}
-      {mode === "view" && selectedPin && <PinViewPanel pin={selectedPin} />}
+      {state.mode === "view" && state.selectedPin && (
+        <PinViewPanel pin={state.selectedPin} />
+      )}
     </div>
   );
 }

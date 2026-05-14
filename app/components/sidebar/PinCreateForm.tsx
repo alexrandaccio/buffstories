@@ -1,11 +1,6 @@
 "use client";
 
-type DraftPin = {
-  latitude: number;
-  longitude: number;
-  title: string;
-  description: string;
-};
+import { DraftPin } from "@/types/pin";
 
 type Props = {
   draftPin: DraftPin;

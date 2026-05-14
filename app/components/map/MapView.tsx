@@ -15,8 +15,6 @@ import { reducer } from "@/hooks/mapReducer";
 export default function MapView() {
   const [state, dispatch] = useReducer(reducer, {
     mode: "none",
-    draftPin: null,
-    selectedPin: null,
   });
 
   const [pins, setPins] = useState<Pin[]>([]);
@@ -29,7 +27,7 @@ export default function MapView() {
       return;
     }
 
-    setPins(data || []);
+    setPins(data ?? []);
   };
 
   useEffect(() => {
@@ -47,21 +45,25 @@ export default function MapView() {
   };
 
   const handleSavePin = async () => {
-    if (!state.draftPin) return;
+    if (state.mode !== "create") return;
 
-    const { error } = await supabase.from("pins").insert({
-      title: state.draftPin.title,
-      description: state.draftPin.description,
-      latitude: state.draftPin.latitude,
-      longitude: state.draftPin.longitude,
-    });
+    const { data, error } = await supabase
+      .from("pins")
+      .insert({
+        title: state.draftPin.title,
+        description: state.draftPin.description,
+        latitude: state.draftPin.latitude,
+        longitude: state.draftPin.longitude,
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error(error);
       return;
     }
 
-    await fetchPins();
+    setPins((prev) => [...prev, data]);
 
     dispatch({ type: "SAVE_SUCCESS" });
   };
@@ -96,7 +98,7 @@ export default function MapView() {
           </Marker>
         ))}
 
-        {state.draftPin && (
+        {state.mode === "create" && (
           <Marker
             longitude={state.draftPin.longitude}
             latitude={state.draftPin.latitude}
