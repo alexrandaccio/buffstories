@@ -10,6 +10,7 @@ import Map, {
 } from "react-map-gl/maplibre";
 
 import "maplibre-gl/dist/maplibre-gl.css";
+import PinSidebar from "../sidebar/PinSidebar";
 
 type DraftPin = {
   latitude: number;
@@ -27,11 +28,17 @@ type Pin = {
 };
 
 export default function MapView() {
+  const [mode, setMode] = useState<"none" | "create" | "view">("none");
+
   const [draftPin, setDraftPin] = useState<DraftPin | null>(null);
   const [pins, setPins] = useState<Pin[]>([]);
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
 
   const handleMapClick = (e: MapLayerMouseEvent) => {
+    setMode("create");
+
+    setSelectedPin(null);
+
     setDraftPin({
       latitude: e.lngLat.lat,
       longitude: e.lngLat.lng,
@@ -67,7 +74,9 @@ export default function MapView() {
     }
 
     await fetchPins();
+    setMode("none");
     setDraftPin(null);
+    setSelectedPin(null);
   };
 
   useEffect(() => {
@@ -94,6 +103,7 @@ export default function MapView() {
             latitude={pin.latitude}
             onClick={(e) => {
               e.originalEvent.stopPropagation();
+              setMode("view");
               setSelectedPin(pin);
               setDraftPin(null);
             }}
@@ -109,99 +119,15 @@ export default function MapView() {
         )}
       </Map>
 
-      {/* Sidebar */}
-      {(draftPin || selectedPin) && (
-        <div className="absolute top-0 right-0 h-full w-[400px] bg-white shadow-2xl border-l z-10 p-6 overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-black">
-              {draftPin ? "Create Pin" : "View Pin"}
-            </h2>
-
-            <button
-              onClick={() => {
-                setDraftPin(null);
-                setSelectedPin(null);
-              }}
-              className="text-sm text-gray-500 hover:text-black"
-            >
-              Close
-            </button>
-          </div>
-
-          {draftPin && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-black">
-                  Title
-                </label>
-
-                <input
-                  value={draftPin.title}
-                  onChange={(e) =>
-                    setDraftPin({
-                      ...draftPin,
-                      title: e.target.value,
-                    })
-                  }
-                  className="w-full border rounded-lg px-3 py-2 text-black outline-none"
-                  placeholder="Enter title"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-black">
-                  Description
-                </label>
-
-                <textarea
-                  value={draftPin.description}
-                  onChange={(e) =>
-                    setDraftPin({
-                      ...draftPin,
-                      description: e.target.value,
-                    })
-                  }
-                  className="w-full border rounded-lg px-3 py-2 min-h-[150px] text-black outline-none"
-                  placeholder="Enter description"
-                />
-              </div>
-
-              <div className="text-sm text-gray-500 pt-2">
-                <div>Lat: {draftPin.latitude.toFixed(5)}</div>
-                <div>Lng: {draftPin.longitude.toFixed(5)}</div>
-              </div>
-
-              <button
-                onClick={handleSavePin}
-                className="w-full bg-black text-white rounded-lg py-3 hover:opacity-90"
-              >
-                Save Pin
-              </button>
-            </div>
-          )}
-
-          {selectedPin && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-black">
-                  {selectedPin.title}
-                </h3>
-              </div>
-
-              <div className="text-black whitespace-pre-wrap">
-                {selectedPin.description || (
-                  <span className="text-gray-400">No description</span>
-                )}
-              </div>
-
-              <div className="text-sm text-gray-500 pt-2">
-                <div>Lat: {selectedPin.latitude.toFixed(5)}</div>
-                <div>Lng: {selectedPin.longitude.toFixed(5)}</div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <PinSidebar
+        mode={mode}
+        draftPin={draftPin}
+        selectedPin={selectedPin}
+        setMode={setMode}
+        setDraftPin={setDraftPin}
+        setSelectedPin={setSelectedPin}
+        onSave={handleSavePin}
+      />
     </div>
   );
 }
