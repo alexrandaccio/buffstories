@@ -1,12 +1,6 @@
 "use client";
 
-type Pin = {
-  id: string;
-  latitude: number;
-  longitude: number;
-  title: string;
-  description: string | null;
-};
+import { Pin } from "@/types/pin";
 
 type Props = {
   pin: Pin;

@@ -1,51 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
-
 import Map, {
   Marker,
   NavigationControl,
   MapLayerMouseEvent,
 } from "react-map-gl/maplibre";
-
 import "maplibre-gl/dist/maplibre-gl.css";
 import PinSidebar from "../sidebar/PinSidebar";
-
-type DraftPin = {
-  latitude: number;
-  longitude: number;
-  title: string;
-  description: string;
-};
-
-type Pin = {
-  id: string;
-  latitude: number;
-  longitude: number;
-  title: string;
-  description: string | null;
-};
+import { Pin } from "@/types/pin";
+import { reducer } from "@/hooks/mapReducer";
 
 export default function MapView() {
-  const [mode, setMode] = useState<"none" | "create" | "view">("none");
+  const [state, dispatch] = useReducer(reducer, {
+    mode: "none",
+    draftPin: null,
+    selectedPin: null,
+  });
 
-  const [draftPin, setDraftPin] = useState<DraftPin | null>(null);
   const [pins, setPins] = useState<Pin[]>([]);
-  const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
-
-  const handleMapClick = (e: MapLayerMouseEvent) => {
-    setMode("create");
-
-    setSelectedPin(null);
-
-    setDraftPin({
-      latitude: e.lngLat.lat,
-      longitude: e.lngLat.lng,
-      title: "",
-      description: "",
-    });
-  };
 
   const fetchPins = async () => {
     const { data, error } = await supabase.from("pins").select("*");
@@ -58,14 +32,28 @@ export default function MapView() {
     setPins(data || []);
   };
 
+  useEffect(() => {
+    fetchPins();
+  }, []);
+
+  const handleMapClick = (e: MapLayerMouseEvent) => {
+    dispatch({
+      type: "OPEN_CREATE",
+      payload: {
+        lat: e.lngLat.lat,
+        lng: e.lngLat.lng,
+      },
+    });
+  };
+
   const handleSavePin = async () => {
-    if (!draftPin) return;
+    if (!state.draftPin) return;
 
     const { error } = await supabase.from("pins").insert({
-      title: draftPin.title,
-      description: draftPin.description,
-      latitude: draftPin.latitude,
-      longitude: draftPin.longitude,
+      title: state.draftPin.title,
+      description: state.draftPin.description,
+      latitude: state.draftPin.latitude,
+      longitude: state.draftPin.longitude,
     });
 
     if (error) {
@@ -74,14 +62,9 @@ export default function MapView() {
     }
 
     await fetchPins();
-    setMode("none");
-    setDraftPin(null);
-    setSelectedPin(null);
-  };
 
-  useEffect(() => {
-    fetchPins();
-  }, []);
+    dispatch({ type: "SAVE_SUCCESS" });
+  };
 
   return (
     <div className="relative w-full h-screen">
@@ -103,31 +86,27 @@ export default function MapView() {
             latitude={pin.latitude}
             onClick={(e) => {
               e.originalEvent.stopPropagation();
-              setMode("view");
-              setSelectedPin(pin);
-              setDraftPin(null);
+              dispatch({
+                type: "OPEN_VIEW",
+                payload: pin,
+              });
             }}
           >
             <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg cursor-pointer" />
           </Marker>
         ))}
 
-        {draftPin && (
-          <Marker longitude={draftPin.longitude} latitude={draftPin.latitude}>
+        {state.draftPin && (
+          <Marker
+            longitude={state.draftPin.longitude}
+            latitude={state.draftPin.latitude}
+          >
             <div className="w-5 h-5 rounded-full bg-red-500 border-2 border-white shadow-lg" />
           </Marker>
         )}
       </Map>
 
-      <PinSidebar
-        mode={mode}
-        draftPin={draftPin}
-        selectedPin={selectedPin}
-        setMode={setMode}
-        setDraftPin={setDraftPin}
-        setSelectedPin={setSelectedPin}
-        onSave={handleSavePin}
-      />
+      <PinSidebar state={state} dispatch={dispatch} onSave={handleSavePin} />
     </div>
   );
 }
