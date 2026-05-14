@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 import Map, {
   Marker,
@@ -17,8 +18,17 @@ type DraftPin = {
   description: string;
 };
 
+type Pin = {
+  id: string;
+  latitude: number;
+  longitude: number;
+  title: string;
+  description: string | null;
+};
+
 export default function MapView() {
   const [draftPin, setDraftPin] = useState<DraftPin | null>(null);
+  const [pins, setPins] = useState<Pin[]>([]);
 
   const handleMapClick = (e: MapLayerMouseEvent) => {
     setDraftPin({
@@ -28,6 +38,45 @@ export default function MapView() {
       description: ""
     });
   };
+
+  const fetchPins = async () => {
+    const { data, error } = await supabase
+        .from("pins")
+        .select("*");
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    setPins(data);
+    };
+
+    const handleSavePin = async () => {
+        if (!draftPin) return;
+
+        const { error } = await supabase
+            .from("pins")
+            .insert({
+            title: draftPin.title,
+            description: draftPin.description,
+            latitude: draftPin.latitude,
+            longitude: draftPin.longitude
+            });
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        await fetchPins();
+
+        setDraftPin(null);
+        };
+
+  useEffect(() => {
+    fetchPins();
+    }, []);
 
   return (
     <div className="relative w-full h-screen">
@@ -41,6 +90,16 @@ export default function MapView() {
         mapStyle={`https://api.maptiler.com/maps/streets-v2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
       >
         <NavigationControl position="top-right" />
+
+        {pins.map((pin) => (
+            <Marker
+                key={pin.id}
+                longitude={pin.longitude}
+                latitude={pin.latitude}
+            >
+                <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg" />
+            </Marker>
+        ))}
 
         {draftPin && (
           <Marker
@@ -114,7 +173,8 @@ export default function MapView() {
             </div>
 
             <button
-              className="w-full bg-black text-white rounded-lg py-3 hover:opacity-90"
+                onClick={handleSavePin}
+                className="w-full bg-black text-white rounded-lg py-3 hover:opacity-90"
             >
               Save Pin
             </button>
