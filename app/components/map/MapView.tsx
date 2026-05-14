@@ -29,6 +29,7 @@ type Pin = {
 export default function MapView() {
   const [draftPin, setDraftPin] = useState<DraftPin | null>(null);
   const [pins, setPins] = useState<Pin[]>([]);
+  const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
 
   const handleMapClick = (e: MapLayerMouseEvent) => {
     setDraftPin({
@@ -91,85 +92,114 @@ export default function MapView() {
             key={pin.id}
             longitude={pin.longitude}
             latitude={pin.latitude}
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              setSelectedPin(pin);
+              setDraftPin(null);
+            }}
           >
-            <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg" />
+            <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg cursor-pointer" />
           </Marker>
         ))}
 
         {draftPin && (
-          <Marker
-            longitude={draftPin.longitude}
-            latitude={draftPin.latitude}
-          >
+          <Marker longitude={draftPin.longitude} latitude={draftPin.latitude}>
             <div className="w-5 h-5 rounded-full bg-red-500 border-2 border-white shadow-lg" />
           </Marker>
         )}
       </Map>
 
-      {draftPin && (
+      {/* Sidebar */}
+      {(draftPin || selectedPin) && (
         <div className="absolute top-0 right-0 h-full w-[400px] bg-white shadow-2xl border-l z-10 p-6 overflow-y-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-black">
-              Create Pin
+              {draftPin ? "Create Pin" : "View Pin"}
             </h2>
 
             <button
-              onClick={() => setDraftPin(null)}
+              onClick={() => {
+                setDraftPin(null);
+                setSelectedPin(null);
+              }}
               className="text-sm text-gray-500 hover:text-black"
             >
               Close
             </button>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-black">
-                Title
-              </label>
+          {draftPin && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-black">
+                  Title
+                </label>
 
-              <input
-                value={draftPin.title}
-                onChange={(e) =>
-                  setDraftPin({
-                    ...draftPin,
-                    title: e.target.value,
-                  })
-                }
-                className="w-full border rounded-lg px-3 py-2 text-black outline-none"
-                placeholder="Enter title"
-              />
+                <input
+                  value={draftPin.title}
+                  onChange={(e) =>
+                    setDraftPin({
+                      ...draftPin,
+                      title: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-black outline-none"
+                  placeholder="Enter title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-black">
+                  Description
+                </label>
+
+                <textarea
+                  value={draftPin.description}
+                  onChange={(e) =>
+                    setDraftPin({
+                      ...draftPin,
+                      description: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 min-h-[150px] text-black outline-none"
+                  placeholder="Enter description"
+                />
+              </div>
+
+              <div className="text-sm text-gray-500 pt-2">
+                <div>Lat: {draftPin.latitude.toFixed(5)}</div>
+                <div>Lng: {draftPin.longitude.toFixed(5)}</div>
+              </div>
+
+              <button
+                onClick={handleSavePin}
+                className="w-full bg-black text-white rounded-lg py-3 hover:opacity-90"
+              >
+                Save Pin
+              </button>
             </div>
+          )}
 
-            <div>
-              <label className="block text-sm font-medium mb-1 text-black">
-                Description
-              </label>
+          {selectedPin && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-black">
+                  {selectedPin.title}
+                </h3>
+              </div>
 
-              <textarea
-                value={draftPin.description}
-                onChange={(e) =>
-                  setDraftPin({
-                    ...draftPin,
-                    description: e.target.value,
-                  })
-                }
-                className="w-full border rounded-lg px-3 py-2 min-h-[150px] text-black outline-none"
-                placeholder="Enter description"
-              />
+              <div className="text-black whitespace-pre-wrap">
+                {selectedPin.description || (
+                  <span className="text-gray-400">No description</span>
+                )}
+              </div>
+
+              <div className="text-sm text-gray-500 pt-2">
+                <div>Lat: {selectedPin.latitude.toFixed(5)}</div>
+                <div>Lng: {selectedPin.longitude.toFixed(5)}</div>
+              </div>
             </div>
-
-            <div className="text-sm text-gray-500 pt-2">
-              <div>Lat: {draftPin.latitude.toFixed(5)}</div>
-              <div>Lng: {draftPin.longitude.toFixed(5)}</div>
-            </div>
-
-            <button
-              onClick={handleSavePin}
-              className="w-full bg-black text-white rounded-lg py-3 hover:opacity-90"
-            >
-              Save Pin
-            </button>
-          </div>
+          )}
         </div>
       )}
     </div>
