@@ -100,6 +100,28 @@ export default function MapView() {
     }
   };
 
+  const handleDeletePin = async () => {
+    if (state.mode !== "view") return;
+
+    const confirmed = window.confirm(`Delete "${state.selectedPin.title}"?`);
+
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from("pins")
+      .delete()
+      .eq("id", state.selectedPin.id);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setPins((prev) => prev.filter((pin) => pin.id !== state.selectedPin.id));
+
+    dispatch({ type: "CLOSE" });
+  };
+
   return (
     <div className="relative w-full h-screen">
       <Map
@@ -140,7 +162,12 @@ export default function MapView() {
         )}
       </Map>
 
-      <PinSidebar state={state} dispatch={dispatch} onSave={handleSavePin} />
+      <PinSidebar
+        state={state}
+        dispatch={dispatch}
+        onSave={handleSavePin}
+        onDelete={handleDeletePin}
+      />
     </div>
   );
 }
