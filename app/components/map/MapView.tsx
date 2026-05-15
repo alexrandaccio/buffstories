@@ -127,8 +127,8 @@ export default function MapView() {
       <Map
         onClick={handleMapClick}
         initialViewState={{
-          longitude: -74.0431,
-          latitude: 40.744,
+          longitude: -78.83701,
+          latitude: 42.89074,
           zoom: 11,
         }}
         mapStyle={`https://api.maptiler.com/maps/streets-v2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
