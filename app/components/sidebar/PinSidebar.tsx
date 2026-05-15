@@ -29,7 +29,7 @@ export default function PinSidebar({
 
         <button
           onClick={() => dispatch({ type: "CLOSE" })}
-          className="text-sm text-gray-500 hover:text-black"
+          className="text-sm text-gray-500 cursor-pointer hover:text-black"
         >
           Close
         </button>

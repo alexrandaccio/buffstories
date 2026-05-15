@@ -34,7 +34,7 @@ export default function PinEditor({ mode, draftPin, onChange, onSave }: Props) {
 
       <button
         onClick={onSave}
-        className="w-full bg-black text-white rounded py-2 hover:opacity-90"
+        className="w-full bg-black text-white rounded py-2 cursor-pointer hover:opacity-90"
       >
         {mode === "create" ? "Create Pin" : "Save Changes"}
       </button>
