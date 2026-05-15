@@ -11,6 +11,7 @@ type Props = {
   onDelete: () => void;
   onNext: () => void;
   onPrev: () => void;
+  user: any;
 };
 
 export default function PinSidebar({
@@ -20,25 +21,12 @@ export default function PinSidebar({
   onDelete,
   onNext,
   onPrev,
+  user,
 }: Props) {
   if (state.mode === "none") return null;
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[400px] bg-white shadow-2xl border-l z-10 p-6 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-black">
-          {state.mode === "create" ? "Create Pin" : "View Pin"}
-        </h2>
-
-        <button
-          onClick={() => dispatch({ type: "CLOSE" })}
-          className="text-sm text-gray-500 cursor-pointer hover:text-black"
-        >
-          Close
-        </button>
-      </div>
-
+    <div className="absolute top-0 right-0 h-full w-full max-w-[400px] bg-white shadow-2xl border-l z-10 p-6 overflow-y-auto">
       {/* CREATE / EDIT MODES */}
       {(state.mode === "create" || state.mode === "edit") && (
         <PinEditor
@@ -51,6 +39,7 @@ export default function PinSidebar({
             })
           }
           onSave={onSave}
+          onClose={() => dispatch({ type: "CLOSE" })}
         />
       )}
 
@@ -62,6 +51,8 @@ export default function PinSidebar({
           onDelete={onDelete}
           onNext={onNext}
           onPrev={onPrev}
+          onClose={() => dispatch({ type: "CLOSE" })}
+          user={user}
         />
       )}
     </div>

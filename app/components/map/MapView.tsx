@@ -19,6 +19,7 @@ export default function MapView() {
 
   const mapRef = useRef<any>(null);
   const [pins, setPins] = useState<Pin[]>([]);
+  const [user, setUser] = useState<any>(null);
 
   const fetchPins = async () => {
     const { data, error } = await supabase.from("pins").select("*");
@@ -35,7 +36,23 @@ export default function MapView() {
     fetchPins();
   }, []);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const handleMapClick = (e: MapLayerMouseEvent) => {
+    if (!user) return;
+
     dispatch({
       type: "OPEN_CREATE",
       payload: {
@@ -203,6 +220,7 @@ export default function MapView() {
         onDelete={handleDeletePin}
         onNext={() => openAdjacentPin("next")}
         onPrev={() => openAdjacentPin("prev")}
+        user={user}
       />
     </div>
   );
