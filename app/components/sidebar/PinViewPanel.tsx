@@ -6,9 +6,17 @@ type Props = {
   pin: Pin;
   openEdit: () => void;
   onDelete: () => void;
+  onNext: () => void;
+  onPrev: () => void;
 };
 
-export default function PinViewPanel({ pin, openEdit, onDelete }: Props) {
+export default function PinViewPanel({
+  pin,
+  openEdit,
+  onDelete,
+  onNext,
+  onPrev,
+}: Props) {
   return (
     <div className="space-y-6">
       <div>
@@ -24,6 +32,22 @@ export default function PinViewPanel({ pin, openEdit, onDelete }: Props) {
       <div className="text-sm text-gray-500 space-y-1">
         <div>Lat: {pin.latitude.toFixed(5)}</div>
         <div>Lng: {pin.longitude.toFixed(5)}</div>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={onPrev}
+          className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-black hover:bg-gray-100 transition"
+        >
+          ← Previous
+        </button>
+
+        <button
+          onClick={onNext}
+          className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-black hover:bg-gray-100 transition"
+        >
+          Next →
+        </button>
       </div>
 
       <div className="flex gap-3 pt-2">

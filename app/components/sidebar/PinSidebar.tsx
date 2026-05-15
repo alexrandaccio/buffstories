@@ -9,6 +9,8 @@ type Props = {
   dispatch: React.Dispatch<Action>;
   onSave: () => void;
   onDelete: () => void;
+  onNext: () => void;
+  onPrev: () => void;
 };
 
 export default function PinSidebar({
@@ -16,6 +18,8 @@ export default function PinSidebar({
   dispatch,
   onSave,
   onDelete,
+  onNext,
+  onPrev,
 }: Props) {
   if (state.mode === "none") return null;
 
@@ -56,6 +60,8 @@ export default function PinSidebar({
           pin={state.selectedPin}
           openEdit={() => dispatch({ type: "OPEN_EDIT" })}
           onDelete={onDelete}
+          onNext={onNext}
+          onPrev={onPrev}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import Map, {
   Marker,
@@ -17,6 +17,7 @@ export default function MapView() {
     mode: "none",
   });
 
+  const mapRef = useRef<any>(null);
   const [pins, setPins] = useState<Pin[]>([]);
 
   const fetchPins = async () => {
@@ -122,9 +123,45 @@ export default function MapView() {
     dispatch({ type: "CLOSE" });
   };
 
+  const openPin = (pin: Pin) => {
+    dispatch({
+      type: "OPEN_VIEW",
+      payload: pin,
+    });
+
+    mapRef.current?.flyTo({
+      center: [pin.longitude, pin.latitude],
+      duration: 1500,
+      zoom: Math.max(mapRef.current.getZoom(), 13),
+      essential: true,
+    });
+  };
+
+  const openAdjacentPin = (direction: "next" | "prev") => {
+    if (state.mode !== "view") return;
+
+    const currentIndex = pins.findIndex((p) => p.id === state.selectedPin.id);
+
+    if (currentIndex === -1) return;
+
+    let nextIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1;
+
+    // wrap around
+    if (nextIndex >= pins.length) {
+      nextIndex = 0;
+    }
+
+    if (nextIndex < 0) {
+      nextIndex = pins.length - 1;
+    }
+
+    openPin(pins[nextIndex]);
+  };
+
   return (
     <div className="relative w-full h-screen">
       <Map
+        ref={mapRef}
         onClick={handleMapClick}
         initialViewState={{
           longitude: -78.83701,
@@ -142,10 +179,7 @@ export default function MapView() {
             latitude={pin.latitude}
             onClick={(e) => {
               e.originalEvent.stopPropagation();
-              dispatch({
-                type: "OPEN_VIEW",
-                payload: pin,
-              });
+              openPin(pin);
             }}
           >
             <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg cursor-pointer" />
@@ -167,6 +201,8 @@ export default function MapView() {
         dispatch={dispatch}
         onSave={handleSavePin}
         onDelete={handleDeletePin}
+        onNext={() => openAdjacentPin("next")}
+        onPrev={() => openAdjacentPin("prev")}
       />
     </div>
   );
