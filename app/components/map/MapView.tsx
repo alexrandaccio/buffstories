@@ -189,19 +189,37 @@ export default function MapView() {
       >
         <NavigationControl position="top-right" />
 
-        {pins.map((pin) => (
-          <Marker
-            key={pin.id}
-            longitude={pin.longitude}
-            latitude={pin.latitude}
-            onClick={(e) => {
-              e.originalEvent.stopPropagation();
-              openPin(pin);
-            }}
-          >
-            <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg cursor-pointer" />
-          </Marker>
-        ))}
+        {pins.map((pin) => {
+          const isSelected =
+            state.mode === "view" && state.selectedPin.id === pin.id;
+
+          return (
+            <Marker
+              key={pin.id}
+              longitude={pin.longitude}
+              latitude={pin.latitude}
+              onClick={(e) => {
+                e.originalEvent.stopPropagation();
+                openPin(pin);
+              }}
+            >
+              <div className="relative flex items-center justify-center">
+                {isSelected && (
+                  <div className="absolute bottom-8 whitespace-nowrap rounded-lg bg-black px-3 py-1 text-sm text-white shadow-lg">
+                    {pin.title}
+                  </div>
+                )}
+
+                <div
+                  className={`
+                    rounded-full border-2 border-white shadow-lg cursor-pointer transition-all
+                    ${isSelected ? "w-6 h-6 bg-black" : "w-5 h-5 bg-blue-500"}
+                  `}
+                />
+              </div>
+            </Marker>
+          );
+        })}
 
         {state.mode === "create" && (
           <Marker
