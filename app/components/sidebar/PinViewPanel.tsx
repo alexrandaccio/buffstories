@@ -39,36 +39,45 @@ export default function PinViewPanel({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-black">View Pin</h2>
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* STICKY HEADER */}
+      <div className="sticky top-0 z-10 bg-white px-1 pb-4">
+        <div className="flex items-center justify-between border-b pb-4 pt-1">
+          <h2 className="text-xl font-semibold text-black">View Pin</h2>
 
-        <button
-          onClick={onClose}
-          className="text-sm text-gray-500 cursor-pointer hover:text-black"
-        >
-          Close
-        </button>
-      </div>
+          <button
+            onClick={onClose}
+            className="text-sm text-gray-500 cursor-pointer hover:text-black"
+          >
+            Close
+          </button>
+        </div>
 
-      {/* MAIN CONTENT */}
-      <div className="space-y-6">
-        <div>
+        <div className="pt-6">
           <h3 className="text-xl font-semibold text-black">{pin.title}</h3>
         </div>
+      </div>
 
-        <div className="text-black whitespace-pre-wrap leading-relaxed">
-          {pin.description || (
-            <span className="text-gray-400">No description</span>
-          )}
+      {/* SCROLLABLE CONTENT */}
+      <div className="flex-1 overflow-y-auto py-6 pr-2">
+        <div className="space-y-6">
+          <div className="text-black whitespace-pre-wrap leading-relaxed">
+            {pin.description || (
+              <span className="text-gray-400">No description</span>
+            )}
+          </div>
+
+          <div className="text-sm text-gray-500 space-y-1">
+            <div>Lat: {pin.latitude.toFixed(5)}</div>
+
+            <div>Lng: {pin.longitude.toFixed(5)}</div>
+          </div>
         </div>
+      </div>
 
-        <div className="text-sm text-gray-500 space-y-1">
-          <div>Lat: {pin.latitude.toFixed(5)}</div>
-          <div>Lng: {pin.longitude.toFixed(5)}</div>
-        </div>
-
+      {/* STICKY FOOTER */}
+      <div className="sticky bottom-0 bg-white border-t pt-4 space-y-3">
+        {/* NAVIGATION */}
         <div className="flex gap-3">
           <button
             onClick={onPrev}
@@ -84,13 +93,8 @@ export default function PinViewPanel({
             Next →
           </button>
         </div>
-      </div>
 
-      {/* PUSHER */}
-      <div className="flex-1" />
-
-      {/* AUTH FOOTER */}
-      <div className="pt-6 border-t">
+        {/* AUTH / ADMIN */}
         {user ? (
           <div className="space-y-3">
             <div className="flex gap-3">
