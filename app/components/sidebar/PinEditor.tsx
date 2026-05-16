@@ -47,7 +47,7 @@ export default function PinEditor({
           <label className="block text-sm font-medium mb-1">Description</label>
 
           <textarea
-            className="w-full border rounded px-3 py-2 min-h-[120px]"
+            className="w-full border rounded px-3 py-2 min-h-30"
             value={draftPin.description}
             onChange={(e) => onChange({ description: e.target.value })}
           />

@@ -26,7 +26,7 @@ export default function PinSidebar({
   if (state.mode === "none") return null;
 
   return (
-    <div className="absolute top-0 right-0 h-full w-full max-w-[400px] bg-white shadow-2xl border-l z-10 p-6 overflow-y-auto">
+    <div className="absolute top-0 right-0 h-full w-full max-w-100 bg-white shadow-2xl border-l z-10 p-6 overflow-y-auto">
       {/* CREATE / EDIT MODES */}
       {(state.mode === "create" || state.mode === "edit") && (
         <PinEditor
