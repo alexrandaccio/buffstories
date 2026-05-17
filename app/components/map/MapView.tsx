@@ -202,6 +202,9 @@ export default function MapView() {
                 e.originalEvent.stopPropagation();
                 openPin(pin);
               }}
+              style={{
+                zIndex: isSelected ? 9999 : 0,
+              }}
             >
               <div className="relative flex items-center justify-center">
                 {isSelected && (
